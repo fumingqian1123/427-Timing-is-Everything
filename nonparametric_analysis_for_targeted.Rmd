@@ -1,0 +1,107 @@
+---
+title: "427 targeted"
+author: "Mingqian Fu"
+date: "2024-02-26"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+data<-read_excel('/Users/fuminggan/Downloads/DADY_targeted_coding.xlsx')
+
+data[data == "N/A"] <- NA
+data$JA[is.na(data$JA)] <- 0
+data$JA <- as.numeric(data$JA)
+```
+
+```{r}
+# 组间
+group_compare <- function(group_name_1, group_name_2) {
+  print(wilcox.test(group_name_1$JA, group_name_2$JA, paired = FALSE))
+  print(wilcox.test(group_name_1$SA, group_name_2$SA, paired = FALSE))
+  print(wilcox.test(group_name_1$ABA, group_name_2$ABA, paired = FALSE))
+}
+
+# 组内
+within_comparison <- function(group_name_1, group_name_2) {
+  print(wilcox.test(group_name_1$JA, group_name_2$JA, paired = TRUE))
+  print(wilcox.test(group_name_1$SA, group_name_2$SA, paired = TRUE))
+  print(wilcox.test(group_name_1$ABA, group_name_2$ABA, paired = TRUE))
+}
+```
+
+
+Between-group comparison：
+Test: similar level of metabolites on day 1
+```{r}
+# data filter
+day_1_control <- data %>%
+  filter(str_sub(exp_group,1,3) == "Con" & time_point == 1)
+
+day_1_H1 <- data %>%
+  filter(str_sub(exp_group,1,4) == "H1st" & time_point == 1)
+
+day_1_F1 <- data %>%
+  filter(str_sub(exp_group,1,4) == "F1st" & time_point == 1)
+
+#Mann-Whitney U检验
+group_compare(day_1_control,day_1_H1)
+group_compare(day_1_control,day_1_F1)
+group_compare(day_1_F1,day_1_H1)
+```
+
+Day2:
+```{r}
+# data filter
+day_2_control <- data %>%
+  filter(str_sub(exp_group,1,3) == "Con" & time_point == 2)
+
+day_2_H1 <- data %>%
+  filter(str_sub(exp_group,1,4) == "H1st" & time_point == 2)
+
+day_2_F1 <- data %>%
+  filter(str_sub(exp_group,1,4) == "F1st" & time_point == 2)
+
+#Mann-Whitney U检验
+group_compare(day_2_control,day_2_H1)
+group_compare(day_2_control,day_2_F1)
+group_compare(day_2_F1,day_2_H1)
+```
+
+Day3:
+```{r}
+# data filter
+day_3_control <- data %>%
+  filter(str_sub(exp_group,1,3) == "Con" & time_point == 3)
+
+day_3_H1 <- data %>%
+  filter(str_sub(exp_group,1,4) == "H1st" & time_point == 3)
+
+day_3_F1 <- data %>%
+  filter(str_sub(exp_group,1,4) == "F1st" & time_point == 3)
+
+#Mann-Whitney U检验
+group_compare(day_3_control,day_3_H1)
+group_compare(day_3_control,day_3_F1)
+group_compare(day_3_F1,day_3_H1)
+```
+
+Within-group comparison
+```{r}
+within_comparison(day_1_control,day_2_control)
+within_comparison(day_2_control,day_3_control)
+
+within_comparison(day_1_H1,day_2_H1)
+within_comparison(day_2_H1,day_3_H1)
+
+within_comparison(day_1_F1,day_2_F1)
+within_comparison(day_2_F1,day_3_F1)
+```
+
+
+
+
+
+
+
