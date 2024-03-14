@@ -1,0 +1,68 @@
+---
+title: "target_regression_analysis"
+author: "Mingqian Fu"
+date: "2024-03-14"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+data<-read_excel('/Users/fuminggan/Downloads/DADY_targeted_coding.xlsx')
+
+data[data == "N/A"] <- NA
+data$JA[is.na(data$JA)] <- 0
+data$JA <- as.numeric(data$JA)
+```
+
+regression analysis
+```{r}
+# filter data
+new_data <- data %>%
+  mutate(H1_indicator = case_when(str_sub(exp_group,1,4) == "H1st" ~ 1,
+                                  str_sub(exp_group,1,4) != "H1st" ~ 0),
+         F1_indicator = case_when(str_sub(exp_group,1,4) == "F1st" ~ 1,
+                                  str_sub(exp_group,1,4) != "F1st" ~ 0),
+         day_indicator = case_when(time_point == 1 ~ 0,
+                                  time_point == 2 ~ 1,
+                                  time_point == 3 ~ 2)) %>%
+  select(JA, SA, ABA, H1_indicator, F1_indicator, day_indicator)
+
+# build regression model
+reg_JA <- lm(JA ~ H1_indicator + F1_indicator + day_indicator + H1_indicator*day_indicator + F1_indicator*day_indicator, data = new_data)
+summary(reg_JA)
+
+reg_SA <- lm(SA ~ H1_indicator + F1_indicator + day_indicator + H1_indicator*day_indicator + F1_indicator*day_indicator, data = new_data)
+summary(reg_SA)
+
+reg_ABA <- lm(ABA ~ H1_indicator + F1_indicator + day_indicator + H1_indicator*day_indicator + F1_indicator*day_indicator, data = new_data)
+summary(reg_ABA)
+
+#check assumptions
+shapiro.test(new_data$SA)
+shapiro.test(new_data$ABA)
+```
+
+```{r}
+shapiro.test(log(new_data$ABA))
+```
+```{r}
+reg_log_ABA <- lm(log(ABA) ~ H1_indicator + F1_indicator + day_indicator + H1_indicator*day_indicator + F1_indicator*day_indicator, data = new_data)
+summary(reg_log_ABA)
+```
+
+```{r}
+library(lmtest)
+bptest(reg_log_ABA)
+bptest(reg_SA)
+```
+
+
+
+
+
+
+
+
+
+
